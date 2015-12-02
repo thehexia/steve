@@ -1,33 +1,42 @@
-# Copyright (c) 2015 Flowgrammable.org
+# Copyright (c) 2015 Andrew Sutton
 # All rights reserved
 
-cmake_minimum_required(VERSION 3.0)
-project(steve CXX)
+
+# Project configuration.
+cmake_minimum_required(VERSION 3.1)
+project(lingo C CXX)
 enable_testing()
 
 
-# GMP Dependencies
-find_path(GMP_INCLUDE_DIR NAMES gmp.h)
-find_library(GMP_LIBRARIES NAMES gmp libgmp)
-MESSAGE(STATUS "GMP libs: " ${GMP_LIBRARIES})
-
-
 # Boost dependencies
-find_package(Boost 1.55.0 REQUIRED COMPONENTS 
-  system
-  filesystem)
+find_package(Boost 1.55.0 REQUIRED
+  COMPONENTS system filesystem)
 
 
-# Compiler configuration.
+# LLVM Configuration
+find_package(Threads REQUIRED)
+find_package(LLVM REQUIRED CONFIG)
+llvm_map_components_to_libnames(LLVM_LIBRARIES
+  core support)
+
+# Compiler configuration
 set(CMAKE_CXX_FLAGS "-Wall -std=c++1y")
+
+
+# Configuration for lingo dependencies
+set(LINGO_INCLUDE_DIR ./lingo)
+
+
+# Build configuration
 include_directories(
   .
-  ${CMAKE_SOURCE_DIR}/lingo
-  ${Boost_INCLUDE_DIRS} 
-  ${GMP_INCLUDE_DIR})
-link_directories(${Boost_LIBRARY_DIRS})
+  ${Boost_INCLUDE_DIRS}
+  ${LLVM_INCLUDE_DIRS}
+  ${LINGO_INCLUDE_DIR})
 
+link_directories(
+  ${Boost_LIBRARY_DIRS}
+  ${LLVM_LIBRARY_DIRS})
 
-# Build artefacts
 add_subdirectory(lingo)
-add_subdirectory(steve)
+add_subdirectory(beaker)

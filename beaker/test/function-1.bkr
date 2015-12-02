@@ -1,0 +1,8 @@
+
+def f(n : int, b : bool) -> int 
+{ 
+  return n;
+}
+
+
+
