@@ -1,3 +1,7 @@
 [submodule "lingo"]
 	path = lingo
 	url = https://github.com/asutton/lingo
+[submodule "freeflow"]
+	path = freeflow
+	url = git@github.com:flowgrammable/freeflow.git
+	branch = fp-lite
