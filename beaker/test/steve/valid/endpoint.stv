@@ -1,0 +1,3 @@
+layout dummy { x : int; }
+
+decoder start d1(dummy) { drop; }
