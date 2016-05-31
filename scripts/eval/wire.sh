@@ -1,5 +1,5 @@
 # Input file.
-input=$PWD/input/smallFlows.pcap
+input=$PWD/input/bigFlows.pcap
 
 # Compile the steve app.
 echo "Compiling 'lwire' Steve application"
@@ -15,19 +15,18 @@ flowcap_dir=../build/freeflow/flowcap
 
 echo "Starting 'wire' app"
 # Start the freeflow server running the app.
-$driver "once" $app_dir &
+taskset -c 0 $driver "once" $app_dir &
 
-# Wait for server setup.
 sleep 1
 
 echo "Starting 'sink' (flowcap fetch)"
 # Start the sink.
-$flowcap_dir/flowcap fetch $input 127.0.0.1 5000 &
+taskset -c 1 $flowcap_dir/flowcap fetch $input 127.0.0.1 5000 10 &
 
 sleep 1
 
 echo "Starting 'source' (flowcap forward)"
 # Start the source.
-$flowcap_dir/flowcap forward $input 127.0.0.1 5000 &
+taskset -c 1 $flowcap_dir/flowcap forward $input 127.0.0.1 5000 10 &
 
 wait

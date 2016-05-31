@@ -1,5 +1,5 @@
 # Input file.
-input=$PWD/input/smallFlows.pcap
+input=$PWD/input/bigFlows.pcap
 
 # Compile the steve app.
 echo "Compiling 'endpoint' Steve application"
@@ -15,13 +15,10 @@ flowcap_dir=../build/freeflow/flowcap
 
 echo "Starting 'sink' (fp-endpoint)"
 # Start the freeflow server running the app.
-$driver "once" $app_dir &
-
-# Wait for server setup.
-sleep 1
+taskset -c 1 $driver "once" $app_dir &
 
 echo "Starting 'source' (flowcap forward)"
 # Start the source.
-$flowcap_dir/flowcap forward $input 127.0.0.1 5000 
+taskset -c 1 $flowcap_dir/flowcap forward $input 127.0.0.1 5000 10 &
 
 wait
