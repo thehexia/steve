@@ -15,18 +15,18 @@ flowcap_dir=../build/freeflow/flowcap
 
 echo "Starting 'wire' app"
 # Start the freeflow server running the app.
-taskset -c 0 $driver "once" $app_dir &
+$driver "once" $app_dir &
 
 sleep 1
 
 echo "Starting 'sink' (flowcap fetch)"
 # Start the sink.
-taskset -c 1 $flowcap_dir/flowcap fetch $input 127.0.0.1 5000 10 &
+$flowcap_dir/flowcap fetch $input 127.0.0.1 5000 10 &
 
 sleep 1
 
 echo "Starting 'source' (flowcap forward)"
 # Start the source.
-taskset -c 1 $flowcap_dir/flowcap forward $input 127.0.0.1 5000 10 &
+$flowcap_dir/flowcap forward $input 127.0.0.1 5000 10 &
 
 wait
