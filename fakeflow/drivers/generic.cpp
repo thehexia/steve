@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
       while (cap.get(p)) {
         for (int i = 0; i < iterations; i++) {
           std::uint8_t* buf = new std::uint8_t[p.captured_size()];
-          std::unique_ptr<uint8_t> ptr(buf);
+
           std::memcpy(&buf[0], p.data(), p.captured_size());
 
           int r = std::rand() % num_ports;

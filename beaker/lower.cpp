@@ -1573,7 +1573,7 @@ Lowerer::lower(Match_stmt* s)
   }
 
   if (s->has_miss())
-    miss = lower(s->miss()).back();
+    miss = block(lower(s->miss()));
 
   Match_stmt* match = new Match_stmt(condition, cases, miss);
 

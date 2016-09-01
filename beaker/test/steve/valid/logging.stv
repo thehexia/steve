@@ -2,6 +2,7 @@ foreign def printf(fmt : char[], ...) -> int;
 foreign def fprintf(fp : uint(8)&, fmt : char[], ...) -> int;
 foreign def fopen(filename : char[], mode : char[]) -> uint(8)&;
 foreign def fclose(uint(8)&) -> int;
+foreign def puts(str : char[]) -> int;
 
 layout eth
 {
@@ -55,6 +56,7 @@ decoder start eth_d(eth)
   extract eth.type;
   match(eth.type) {
     case 0x800: decode ipv4_d;
+    miss: drop;
   }
 }
 
@@ -71,68 +73,25 @@ decoder ipv4_d(ipv4)
   // Only care about udp and tcp requests,
   match (ipv4.protocol) {
     case 0x06: decode tcp_d advance hdr_len;
-    // case 0x11: decode udp_d advance hdr_len;
+    case 0x11: decode udp_d advance hdr_len;
+    miss: drop;
   }
 }
+
 
 decoder udp_d(udp)
 {
   extract udp.dst;
-  goto udp_filter;
+  if (udp.dst != 80 && udp.dst != 443) {
+    printf("%d\n", udp.dst);
+    drop;
+  }
 }
 
 
 decoder tcp_d(tcp)
 {
   extract tcp.dst;
-  goto tcp_filter;
-}
-
-
-exact_table udp_filter(udp.dst) requires(ipv4.src)
-{
-  { 80 } -> { raise log_allowed_tcp; }
-  // miss -> { raise log_blocked_tcp; }
-}
-
-
-// Only route if the port# is 80 or 443
-// Log the IP address of all blocked and all allowed.
-exact_table tcp_filter(tcp.dst)
-  requires(ipv4.src)
-{
-  { 80 } -> { raise log_allowed_tcp; }
-  // miss -> { raise log_blocked_tcp; }
-}
-
-
-event log_allowed_udp requires(ipv4.src, udp.dst)
-{
-  var fp : uint(8)& = fopen("allowed.txt", "a");
-  fprintf(fp, "Allowing address: %x\n", ipv4.src);
-  fclose(fp);
-}
-
-
-event log_blocked_udp requires(ipv4.src, udp.dst)
-{
-  var fp : uint(8)& = fopen("blocked.txt", "a");
-  fprintf(fp, "Blocking address: %x\n", ipv4.src);
-  fclose(fp);
-}
-
-
-event log_allowed_tcp requires(ipv4.src, tcp.dst)
-{
-  var fp : uint(8)& = fopen("allowed.txt", "a");
-  fprintf(fp, "Allowing address: %x\n", ipv4.src);
-  fclose(fp);
-}
-
-
-event log_blocked_tcp requires(ipv4.src, tcp.dst)
-{
-  var fp : uint(8)& = fopen("blocked.txt", "a");
-  fprintf(fp, "Blocking address: %x\n", ipv4.src);
-  fclose(fp);
+  if (tcp.dst != 80 && tcp.dst != 443)
+    drop;
 }
